@@ -75,7 +75,7 @@ def row_sanitize(value, new_row):
 def weekly_model(client):
     now = datetime.datetime.now()
     timestamp_now = now.strftime("%Y-%m-%d %H:%M:%S")
-    query = """SELECT `pfsense_logs`.`id`,
+    query = """SELECT 
 	`pfsense_logs`.`type_code`,
     `pfsense_logs`.`pfsense_instance`,
     `pfsense_logs`.`log_type`,
@@ -98,7 +98,7 @@ FROM `Dashboard_DB`.`pfsense_logs` WHERE record_time <= '{}' AND record_time >='
     week_ago = now - datetime.timedelta(days=7)
     timestamp_week_ago = week_ago.strftime("%Y-%m-%d %H:%M:%S")
     results = query_db(query.format(timestamp_now, timestamp_week_ago, client[0]))
-    model = IsolationForest(n_estimators = 10)
+    model = IsolationForest(max_features = 18, n_estimators = 10)
     # fit model
     max = len(results)
     count = 0
@@ -127,7 +127,7 @@ def process():
     return(models)
 
 def check(client, model):
-    query = """SELECT `pfsense_logs`.`id`,
+    query = """SELECT 
 	`pfsense_logs`.`type_code`,
     `pfsense_logs`.`pfsense_instance`,
     `pfsense_logs`.`log_type`,
@@ -162,10 +162,10 @@ def check(client, model):
 
 
 master_count = 0
-master_max = 50
+master_max = 5
 while(master_count < master_max):
     models = process()
-    max_value = 20
+    max_value = 50
     count = 0
     result_set = []
     while (count < max_value):
