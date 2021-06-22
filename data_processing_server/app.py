@@ -187,5 +187,7 @@ FROM `Dashboard_DB`.`pfsense_logs` WHERE record_time <= '{}' AND record_time >='
                     sub_path = os.mkdir(sub_path)
                 except:
                     pass
+                logging.warning(result[1])
+                logging.warning(sub_path)
                 joblib.dump(result[1], sub_path + "/last_week.joblib")
                 logging.warning("Done")
