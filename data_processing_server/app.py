@@ -12,8 +12,6 @@ import calendar
 import joblib
 from datetime import date
 
-logging.basicConfig(filename="Test.log", level=logging.DEBUG)
-
 #ADD TO LOG
 logging.warning("Program Started")
 
