@@ -98,7 +98,7 @@ FROM `Dashboard_DB`.`pfsense_logs` WHERE record_time <= '{}' AND record_time >='
     week_ago = now - datetime.timedelta(days=7)
     timestamp_week_ago = week_ago.strftime("%Y-%m-%d %H:%M:%S")
     results = query_db(query.format(timestamp_now, timestamp_week_ago, client[0]))
-    model = IsolationForest(max_features = 18, n_estimators = 100)
+    model = IsolationForest(max_features = 18, n_estimators = 180)
     # fit model
     max = len(results)
     count = 0
