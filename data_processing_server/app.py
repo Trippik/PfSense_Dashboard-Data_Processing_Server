@@ -8,7 +8,6 @@ import os
 import datetime
 from sklearn.ensemble import IsolationForest
 import numpy as np
-import time
 import calendar
 import joblib
 from datetime import date
@@ -19,11 +18,11 @@ logging.basicConfig(filename="Test.log", level=logging.DEBUG)
 logging.warning("Program Started")
 
 #SET DB PARAMETERS
-db_host = "192.168.40.47"
-db_user = "root"
-db_password = "Cl0udyDay!"
-db_schema = "Dashboard_DB"
-db_port = "3306"
+db_host = os.environ["DB_IP"]
+db_user = os.environ["DB_USER"]
+db_password = os.environ["DB_PASS"]
+db_schema = os.environ["DB_SCHEMA"]
+db_port = os.environ["DB_PORT"]
 
 #SET STORAGE DIRECTORY
 dir = "/var/models/"
@@ -86,7 +85,7 @@ def weekly_process(query):
     final_results = []
     for client in clients:
         results = query_db(query.format(timestamp_now, timestamp_week_ago, client[0]))
-        model = IsolationForest(max_features = 18, n_estimators = 100)
+        model = IsolationForest(max_features = 18, n_estimators = 100, n_jobs=-1)
         # fit model
         max = len(results)
         count = 0
@@ -109,16 +108,16 @@ def weekly_process(query):
 
 def daily_process(query):
     clients = list_clients()
-    print(clients)
+    logging.warning(clients)
     now = datetime.datetime.now()
     yesterday = now - datetime.timedelta(days=1)
     timestamp_yesterday = yesterday.strftime("%Y-%m-%d %H:%M:%S")
     timestamp_now = now.strftime("%Y-%m-%d %H:%M:%S")
     final_results = []
     for client in clients:
-        print("Single Client Start: " + timestamp_now)
+        logging.warning("Single Client Start: " + timestamp_now)
         results = query_db(query.format(timestamp_now, timestamp_yesterday, client[0]))
-        model = IsolationForest(max_features = 18, n_estimators = 100)
+        model = IsolationForest(max_features = 18, n_estimators = 100, n_jobs=-1)
         # fit model
         max = len(results)
         count = 0
@@ -139,7 +138,7 @@ def daily_process(query):
         final_results = [[client, model]]
     now = datetime.datetime.now()
     timestamp_now = now.strftime("%Y-%m-%d %H:%M:%S")
-    print("Finish: " + timestamp_now)
+    logging.warning("Finish: " + timestamp_now)
     return(final_results)
 
 while(loop == True):
@@ -167,9 +166,33 @@ FROM `Dashboard_DB`.`pfsense_logs` WHERE record_time <= '{}' AND record_time >='
     my_date = date.today()
     todays_day = calendar.day_name[my_date.weekday()]
     current_time = now.strftime("%H:%M")
-    if(current_time == "19:46"):
-        print("Started")
-        print(daily_process(query))
-    if(todays_day == "Tuesday"):
-        results = weekly_process(query)
-    input()
+    current_date = now.strftime("%Y-%m-%d")
+    if(current_time == os.environ["TIME"]):
+        results = daily_process(query)
+        for result in results:
+            sub_path = os.path.join(path + "/" + result[0][2])
+            try:
+                sub_path = os.mkdir(sub_path)
+            except:
+                pass
+            joblib.dump(result[1], sub_path + "/yesterday.joblib")
+            joblib.dump(result[1], sub_path + "/" + todays_day + ".joblib")
+            logging.warning("Done")
+            #except:
+             #   pass
+        if(todays_day == os.environ["day"]):
+            logging.warning("start")
+            results = weekly_process(query)
+            path = os.path.join(dir + "/weekly_models")
+            try:
+                os.mkdir(path)
+            except:
+                pass
+            for result in results:
+                sub_path = os.path.join(path + "/" + result[0][2])
+                try:
+                    sub_path = os.mkdir(sub_path)
+                except:
+                    pass
+                joblib.dump(result[1], sub_path + "/last_week.joblib")
+                logging.warning("Done")
