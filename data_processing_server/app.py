@@ -168,7 +168,7 @@ FROM `Dashboard_DB`.`pfsense_logs` WHERE record_time <= '{}' AND record_time >='
     if(current_time == os.environ["TIME"]):
         results = daily_process(query)
         for result in results:
-            sub_path = os.path.join(path + "/" + result[0][2])
+            sub_path = os.path.join(dir + "/" + result[0][2])
             try:
                 sub_path = os.mkdir(sub_path)
             except:
@@ -181,13 +181,8 @@ FROM `Dashboard_DB`.`pfsense_logs` WHERE record_time <= '{}' AND record_time >='
         if(todays_day == os.environ["day"]):
             logging.warning("start")
             results = weekly_process(query)
-            path = os.path.join(dir + "/weekly_models")
-            try:
-                os.mkdir(path)
-            except:
-                pass
             for result in results:
-                sub_path = os.path.join(path + "/" + result[0][2])
+                sub_path = os.path.join(dir + "/" + result[0][2])
                 try:
                     sub_path = os.mkdir(sub_path)
                 except:
