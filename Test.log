@@ -62,3 +62,24 @@ DEBUG:root:4 iteration normal count: 37
 DEBUG:root:4 iteration abnormal count: 13
 DEBUG:root:Number of entries in DB: 44555
 DEBUG:root:----------------------------------------------------------------------------------------
+WARNING:root:Program Started
+DEBUG:root:0 iteration normal count: 26
+DEBUG:root:0 iteration abnormal count: 24
+DEBUG:root:Number of entries in DB: 46237
+DEBUG:root:----------------------------------------------------------------------------------------
+DEBUG:root:1 iteration normal count: 30
+DEBUG:root:1 iteration abnormal count: 20
+DEBUG:root:Number of entries in DB: 47138
+DEBUG:root:----------------------------------------------------------------------------------------
+DEBUG:root:2 iteration normal count: 23
+DEBUG:root:2 iteration abnormal count: 27
+DEBUG:root:Number of entries in DB: 47856
+DEBUG:root:----------------------------------------------------------------------------------------
+DEBUG:root:3 iteration normal count: 28
+DEBUG:root:3 iteration abnormal count: 22
+DEBUG:root:Number of entries in DB: 48686
+DEBUG:root:----------------------------------------------------------------------------------------
+DEBUG:root:4 iteration normal count: 34
+DEBUG:root:4 iteration abnormal count: 16
+DEBUG:root:Number of entries in DB: 49417
+DEBUG:root:----------------------------------------------------------------------------------------
