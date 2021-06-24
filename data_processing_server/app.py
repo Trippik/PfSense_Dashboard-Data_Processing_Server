@@ -9,7 +9,7 @@ import datetime
 from sklearn.ensemble import IsolationForest
 import numpy as np
 import calendar
-import joblib
+import pickle
 from datetime import date
 
 #ADD TO LOG
@@ -173,8 +173,8 @@ FROM `Dashboard_DB`.`pfsense_logs` WHERE record_time <= '{}' AND record_time >='
                 sub_path = os.mkdir(sub_path)
             except:
                 pass
-            joblib.dump(result[1], sub_path + "/yesterday.joblib")
-            joblib.dump(result[1], sub_path + "/" + todays_day + ".joblib")
+	    pickle.dump(result[1], open(sub_path + "/yesterday.pickle"), 'wb'))
+	    pickle.dump(result[1], open(sub_path + "/" + todays_day + ".pickle"), 'wb'))
             logging.warning("Done")
             #except:
              #   pass
@@ -189,5 +189,5 @@ FROM `Dashboard_DB`.`pfsense_logs` WHERE record_time <= '{}' AND record_time >='
                     pass
                 logging.warning(result[1])
                 logging.warning(sub_path)
-                joblib.dump(result[1], sub_path + "/last_week.joblib")
+		pickle.dump(result[1], open(sub_path + "/last_week.pickle"), 'wb'))
                 logging.warning("Done")
