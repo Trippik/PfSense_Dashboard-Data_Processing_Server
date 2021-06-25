@@ -168,26 +168,27 @@ FROM `Dashboard_DB`.`pfsense_logs` WHERE record_time <= '{}' AND record_time >='
     if(current_time == os.environ["TIME"]):
         results = daily_process(query)
         for result in results:
-            sub_path = os.path.join(dir + "/" + result[0][2])
             try:
-                sub_path = os.mkdir(sub_path)
-            except:
-                pass
-	    pickle.dump(result[1], open(sub_path + "/yesterday.pickle"), 'wb')
-	    pickle.dump(result[1], open(sub_path + "/" + todays_day + ".pickle"), 'wb')
-            logging.warning("Done")
-            #except:
-             #   pass
-        if(todays_day == os.environ["day"]):
-            logging.warning("start")
-            results = weekly_process(query)
-            for result in results:
                 sub_path = os.path.join(dir + "/" + result[0][2])
                 try:
                     sub_path = os.mkdir(sub_path)
                 except:
                     pass
-                logging.warning(result[1])
-                logging.warning(sub_path)
-		pickle.dump(result[1], open(sub_path + "/last_week.pickle"), 'wb')
-                logging.warning("Done")
+                pickle.dump(result[1], open(sub_path + "/yesterday.pickle"), 'wb')
+                pickle.dump(result[1], open(sub_path + "/" + todays_day + ".pickle"), 'wb')
+                logging.warning("Daily Done")
+            except:
+                logging.warning("Daily Modelling Failed")
+        if(todays_day == os.environ["day"]):
+            try:
+                results = weekly_process(query)
+                for result in results:
+                    sub_path = os.path.join(dir + "/" + result[0][2])
+                    try:
+                        sub_path = os.mkdir(sub_path)
+                    except:
+                        pass
+                    pickle.dump(result[1], open(sub_path + "/last_week.pickle"), 'wb')
+                    logging.warning("Weekly Done")
+            except:
+                logging.warning("Weekly Modelling Failed")
