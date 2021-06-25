@@ -173,8 +173,8 @@ FROM `Dashboard_DB`.`pfsense_logs` WHERE record_time <= '{}' AND record_time >='
                 sub_path = os.mkdir(sub_path)
             except:
                 pass
-	    pickle.dump(result[1], open(sub_path + "/yesterday.pickle"), 'wb'))
-	    pickle.dump(result[1], open(sub_path + "/" + todays_day + ".pickle"), 'wb'))
+	    pickle.dump(result[1], open(sub_path + "/yesterday.pickle"), 'wb')
+	    pickle.dump(result[1], open(sub_path + "/" + todays_day + ".pickle"), 'wb')
             logging.warning("Done")
             #except:
              #   pass
@@ -189,5 +189,5 @@ FROM `Dashboard_DB`.`pfsense_logs` WHERE record_time <= '{}' AND record_time >='
                     pass
                 logging.warning(result[1])
                 logging.warning(sub_path)
-		pickle.dump(result[1], open(sub_path + "/last_week.pickle"), 'wb'))
+		pickle.dump(result[1], open(sub_path + "/last_week.pickle"), 'wb')
                 logging.warning("Done")
