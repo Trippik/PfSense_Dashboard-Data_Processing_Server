@@ -3,6 +3,7 @@
 #----------------------------------------------------
 #IMPORT LIBRARIES
 import logging
+from re import sub
 import mysql.connector
 import os
 import datetime
@@ -23,7 +24,7 @@ db_schema = os.environ["DB_SCHEMA"]
 db_port = os.environ["DB_PORT"]
 
 #SET STORAGE DIRECTORY
-dir = "/var/models/"
+dir = "/var/models"
 
 loop = True
 
@@ -73,6 +74,13 @@ def row_sanitize(value, new_row):
     value = int(value)
     new_row = new_row + [value]
     return(new_row)
+
+def create_sub_path(sub_path):
+    if not os.path.exists(sub_path):
+        os.mkdir(sub_path)
+    
+def model_save(model, directory_name):
+    pickle.dump(model, open(directory_name, "wb"))
 
 def weekly_process(query):
     clients = list_clients()
@@ -170,12 +178,9 @@ FROM `Dashboard_DB`.`pfsense_logs` WHERE record_time <= '{}' AND record_time >='
         for result in results:
             try:
                 sub_path = os.path.join(dir + "/" + result[0][2])
-                try:
-                    sub_path = os.mkdir(sub_path)
-                except:
-                    pass
-                pickle.dump(result[1], open(sub_path + "/yesterday.pickle"), 'wb')
-                pickle.dump(result[1], open(sub_path + "/" + todays_day + ".pickle"), 'wb')
+                create_sub_path(sub_path)
+                model_save(result[1], sub_path + "/yesterday.pickle")
+                model_save(result[1], sub_path + "/" + todays_day + ".pickle")
                 logging.warning("Daily Done")
             except:
                 logging.warning("Daily Modelling Failed")
@@ -184,11 +189,8 @@ FROM `Dashboard_DB`.`pfsense_logs` WHERE record_time <= '{}' AND record_time >='
                 results = weekly_process(query)
                 for result in results:
                     sub_path = os.path.join(dir + "/" + result[0][2])
-                    try:
-                        sub_path = os.mkdir(sub_path)
-                    except:
-                        pass
-                    pickle.dump(result[1], open(sub_path + "/last_week.pickle"), 'wb')
+                    create_sub_path(sub_path)
+                    model_save(result[1], sub_path + "/last_week.pickle")
                     logging.warning("Weekly Done")
             except:
                 logging.warning("Weekly Modelling Failed")
