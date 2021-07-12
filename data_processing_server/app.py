@@ -94,7 +94,7 @@ def weekly_process(query):
         logging.warning(client[2])
         logging.warning("Single Client Start: " + timestamp_now)
         results = query_db(query.format(timestamp_now, timestamp_week_ago, client[0]))
-        model = IsolationForest(max_features = 18, n_estimators = 100, n_jobs=-1)
+        model = IsolationForest(max_features = 17, n_estimators = 100, n_jobs=-1)
         # fit model
         max = len(results)
         count = 0
@@ -130,7 +130,7 @@ def daily_process(query):
         logging.warning(client[2])
         logging.warning("Single Client Start: " + timestamp_now)
         results = query_db(query.format(timestamp_now, timestamp_yesterday, client[0]))
-        model = IsolationForest(max_features = 18, n_estimators = 100, n_jobs=-1)
+        model = IsolationForest(max_features = 17, n_estimators = 100, n_jobs=-1)
         # fit model
         max = len(results)
         count = 0
@@ -172,7 +172,6 @@ while(loop == True):
     `pfsense_logs`.`protocol`,
     `pfsense_logs`.`source_ip`,
     `pfsense_logs`.`destination_ip`,
-    `pfsense_logs`.`source_port`,
     `pfsense_logs`.`destination_port`
 FROM `Dashboard_DB`.`pfsense_logs` WHERE record_time <= '{}' AND record_time >='{}' AND pfsense_instance = '{}'"""
     now = datetime.datetime.now()
