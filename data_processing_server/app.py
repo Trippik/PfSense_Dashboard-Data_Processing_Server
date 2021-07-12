@@ -83,6 +83,7 @@ def model_save(model, directory_name):
     pickle.dump(model, open(directory_name, "wb"))
 
 def weekly_process(query):
+    logging.warning("Weekly Processing Starting")
     clients = list_clients()
     now = datetime.datetime.now()
     week_ago = now - datetime.timedelta(days=7)
@@ -90,6 +91,8 @@ def weekly_process(query):
     timestamp_now = now.strftime("%Y-%m-%d %H:%M:%S")
     final_results = []
     for client in clients:
+        logging.warning(client[2])
+        logging.warning("Single Client Start: " + timestamp_now)
         results = query_db(query.format(timestamp_now, timestamp_week_ago, client[0]))
         model = IsolationForest(max_features = 18, n_estimators = 100, n_jobs=-1)
         # fit model
@@ -110,17 +113,21 @@ def weekly_process(query):
         client_results = np.array(data)
         model.fit(client_results)
         final_results = [[client, model]]
+        now = datetime.datetime.now()
+        timestamp_now = now.strftime("%Y-%m-%d %H:%M:%S")
+        logging.warning("Finish: " + timestamp_now)
     return(final_results)
 
 def daily_process(query):
+    logging.warning("Daily Processing Starting")
     clients = list_clients()
-    logging.warning(clients)
     now = datetime.datetime.now()
     yesterday = now - datetime.timedelta(days=1)
     timestamp_yesterday = yesterday.strftime("%Y-%m-%d %H:%M:%S")
     timestamp_now = now.strftime("%Y-%m-%d %H:%M:%S")
     final_results = []
     for client in clients:
+        logging.warning(client[2])
         logging.warning("Single Client Start: " + timestamp_now)
         results = query_db(query.format(timestamp_now, timestamp_yesterday, client[0]))
         model = IsolationForest(max_features = 18, n_estimators = 100, n_jobs=-1)
@@ -142,9 +149,9 @@ def daily_process(query):
         client_results = np.array(data)
         model.fit(client_results)
         final_results = [[client, model]]
-    now = datetime.datetime.now()
-    timestamp_now = now.strftime("%Y-%m-%d %H:%M:%S")
-    logging.warning("Finish: " + timestamp_now)
+        now = datetime.datetime.now()
+        timestamp_now = now.strftime("%Y-%m-%d %H:%M:%S")
+        logging.warning("Finish: " + timestamp_now)
     return(final_results)
 
 while(loop == True):
