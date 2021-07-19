@@ -91,31 +91,34 @@ def weekly_process(query):
     timestamp_now = now.strftime("%Y-%m-%d %H:%M:%S")
     final_results = []
     for client in clients:
-        logging.warning(client[2])
-        logging.warning("Single Client Start: " + timestamp_now)
-        results = query_db(query.format(timestamp_now, timestamp_week_ago, client[0]))
-        model = IsolationForest(max_features = 17, n_estimators = 100, n_jobs=-1)
-        # fit model
-        max = len(results)
-        count = 0
-        data = []
-        while(count < max):
-            row = results[count]
-            max_row = len(row)
-            count_row = 0
-            new_row = []
-            while(count_row < max_row):
-                value = row[count_row]
-                new_row = row_sanitize(value, new_row)
-                count_row = count_row + 1
-            data = data + [new_row]
-            count = count + 1
-        client_results = np.array(data)
-        model.fit(client_results)
-        final_results = [[client, model]]
-        now = datetime.datetime.now()
-        timestamp_now = now.strftime("%Y-%m-%d %H:%M:%S")
-        logging.warning("Finish: " + timestamp_now)
+        try:
+            logging.warning(client[2])
+            logging.warning("Single Client Start: " + timestamp_now)
+            results = query_db(query.format(timestamp_now, timestamp_week_ago, client[0]))
+            model = IsolationForest(max_features = 17, n_estimators = 100, n_jobs=-1)
+            # fit model
+            max = len(results)
+            count = 0
+            data = []
+            while(count < max):
+                row = results[count]
+                max_row = len(row)
+                count_row = 0
+                new_row = []
+                while(count_row < max_row):
+                    value = row[count_row]
+                    new_row = row_sanitize(value, new_row)
+                    count_row = count_row + 1
+                data = data + [new_row]
+                count = count + 1
+            client_results = np.array(data)
+            model.fit(client_results)
+            final_results = [[client, model]]
+            now = datetime.datetime.now()
+            timestamp_now = now.strftime("%Y-%m-%d %H:%M:%S")
+            logging.warning("Finish: " + timestamp_now)
+        except:
+            logging.warning(client[2] + " Errored on Weekly Model")
     return(final_results)
 
 def daily_process(query):
@@ -127,31 +130,34 @@ def daily_process(query):
     timestamp_now = now.strftime("%Y-%m-%d %H:%M:%S")
     final_results = []
     for client in clients:
-        logging.warning(client[2])
-        logging.warning("Single Client Start: " + timestamp_now)
-        results = query_db(query.format(timestamp_now, timestamp_yesterday, client[0]))
-        model = IsolationForest(max_features = 17, n_estimators = 100, n_jobs=-1)
-        # fit model
-        max = len(results)
-        count = 0
-        data = []
-        while(count < max):
-            row = results[count]
-            max_row = len(row)
-            count_row = 0
-            new_row = []
-            while(count_row < max_row):
-                value = row[count_row]
-                new_row = row_sanitize(value, new_row)
-                count_row = count_row + 1
-            data = data + [new_row]
-            count = count + 1
-        client_results = np.array(data)
-        model.fit(client_results)
-        final_results = [[client, model]]
-        now = datetime.datetime.now()
-        timestamp_now = now.strftime("%Y-%m-%d %H:%M:%S")
-        logging.warning("Finish: " + timestamp_now)
+        try:
+            logging.warning(client[2])
+            logging.warning("Single Client Start: " + timestamp_now)
+            results = query_db(query.format(timestamp_now, timestamp_yesterday, client[0]))
+            model = IsolationForest(max_features = 17, n_estimators = 100, n_jobs=-1)
+            # fit model
+            max = len(results)
+            count = 0
+            data = []
+            while(count < max):
+                row = results[count]
+                max_row = len(row)
+                count_row = 0
+                new_row = []
+                while(count_row < max_row):
+                    value = row[count_row]
+                    new_row = row_sanitize(value, new_row)
+                    count_row = count_row + 1
+                data = data + [new_row]
+                count = count + 1
+            client_results = np.array(data)
+            model.fit(client_results)
+            final_results = [[client, model]]
+            now = datetime.datetime.now()
+            timestamp_now = now.strftime("%Y-%m-%d %H:%M:%S")
+            logging.warning("Finish: " + timestamp_now)
+        except:
+            logging.warning(client[2] + " Errored on Daily Model")
     return(final_results)
 
 while(loop == True):
