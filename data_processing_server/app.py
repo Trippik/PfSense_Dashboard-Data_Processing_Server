@@ -190,7 +190,9 @@ FROM `Dashboard_DB`.`pfsense_logs` WHERE record_time <= '{}' AND record_time >='
         for result in results:
             try:
                 sub_path = os.path.join(dir + "/" + result[0][2])
+                logging.warning(sub_path)
                 create_sub_path(sub_path)
+                logging.warning(str(result[1]))
                 model_save(result[1], sub_path + "/yesterday.pickle")
                 model_save(result[1], sub_path + "/" + todays_day + ".pickle")
                 logging.warning("Daily Done")
