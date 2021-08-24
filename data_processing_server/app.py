@@ -76,89 +76,72 @@ def row_sanitize(value, new_row):
     return(new_row)
 
 def create_sub_path(sub_path):
-    if not os.path.exists(sub_path):
+    result = os.path.exists(sub_path)
+    if(result == False):
         os.mkdir(sub_path)
     
 def model_save(model, directory_name):
     pickle.dump(model, open(directory_name, "wb"))
 
-def weekly_process(query):
-    logging.warning("Weekly Processing Starting")
-    clients = list_clients()
+def weekly_process(query, client):
     now = datetime.datetime.now()
     week_ago = now - datetime.timedelta(days=7)
     timestamp_week_ago = week_ago.strftime("%Y-%m-%d %H:%M:%S")
     timestamp_now = now.strftime("%Y-%m-%d %H:%M:%S")
-    final_results = []
-    for client in clients:
-        try:
-            logging.warning(client[2])
-            logging.warning("Single Client Start: " + timestamp_now)
-            results = query_db(query.format(timestamp_now, timestamp_week_ago, client[0]))
-            model = IsolationForest(max_features = 17, n_estimators = 100, n_jobs=-1)
-            # fit model
-            max = len(results)
-            count = 0
-            data = []
-            while(count < max):
-                row = results[count]
-                max_row = len(row)
-                count_row = 0
-                new_row = []
-                while(count_row < max_row):
-                    value = row[count_row]
-                    new_row = row_sanitize(value, new_row)
-                    count_row = count_row + 1
-                data = data + [new_row]
-                count = count + 1
-            client_results = np.array(data)
-            model.fit(client_results)
-            final_results = [[client, model]]
-            now = datetime.datetime.now()
-            timestamp_now = now.strftime("%Y-%m-%d %H:%M:%S")
-            logging.warning("Finish: " + timestamp_now)
-        except:
-            logging.warning(client[2] + " Errored on Weekly Model")
-    return(final_results)
+    logging.warning("Single Client Start: " + timestamp_now)
+    results = query_db(query.format(timestamp_now, timestamp_week_ago, client[0]))
+    model = IsolationForest(max_features = 17, n_estimators = 100, n_jobs=-1)
+    # fit model
+    max = len(results)
+    count = 0
+    data = []
+    while(count < max):
+        row = results[count]
+        max_row = len(row)
+        count_row = 0
+        new_row = []
+        while(count_row < max_row):
+            value = row[count_row]
+            new_row = row_sanitize(value, new_row)
+            count_row = count_row + 1
+        data = data + [new_row]
+        count = count + 1
+    client_results = np.array(data)
+    model.fit(client_results)
+    now = datetime.datetime.now()
+    timestamp_now = now.strftime("%Y-%m-%d %H:%M:%S")
+    logging.warning("Finish: " + timestamp_now)
+    return(model)
 
-def daily_process(query):
-    logging.warning("Daily Processing Starting")
-    clients = list_clients()
+def daily_process(query, client):
     now = datetime.datetime.now()
     yesterday = now - datetime.timedelta(days=1)
     timestamp_yesterday = yesterday.strftime("%Y-%m-%d %H:%M:%S")
     timestamp_now = now.strftime("%Y-%m-%d %H:%M:%S")
-    final_results = []
-    for client in clients:
-        try:
-            logging.warning(client[2])
-            logging.warning("Single Client Start: " + timestamp_now)
-            results = query_db(query.format(timestamp_now, timestamp_yesterday, client[0]))
-            model = IsolationForest(max_features = 17, n_estimators = 100, n_jobs=-1)
-            # fit model
-            max = len(results)
-            count = 0
-            data = []
-            while(count < max):
-                row = results[count]
-                max_row = len(row)
-                count_row = 0
-                new_row = []
-                while(count_row < max_row):
-                    value = row[count_row]
-                    new_row = row_sanitize(value, new_row)
-                    count_row = count_row + 1
-                data = data + [new_row]
-                count = count + 1
-            client_results = np.array(data)
-            model.fit(client_results)
-            final_results = [[client, model]]
-            now = datetime.datetime.now()
-            timestamp_now = now.strftime("%Y-%m-%d %H:%M:%S")
-            logging.warning("Finish: " + timestamp_now)
-        except:
-            logging.warning(client[2] + " Errored on Daily Model")
-    return(final_results)
+    logging.warning("Single Client Start: " + timestamp_now)
+    results = query_db(query.format(timestamp_now, timestamp_yesterday, client))
+    model = IsolationForest(max_features = 17, n_estimators = 100, n_jobs=-1)
+    # fit model
+    max = len(results)
+    count = 0
+    data = []
+    while(count < max):
+        row = results[count]
+        max_row = len(row)
+        count_row = 0
+        new_row = []
+        while(count_row < max_row):
+            value = row[count_row]
+            new_row = row_sanitize(value, new_row)
+            count_row = count_row + 1
+        data = data + [new_row]
+        count = count + 1
+    client_results = np.array(data)
+    model.fit(client_results)
+    now = datetime.datetime.now()
+    timestamp_now = now.strftime("%Y-%m-%d %H:%M:%S")
+    logging.warning("Finish: " + timestamp_now)
+    return(model)
 
 while(loop == True):
     query = """SELECT 
@@ -186,25 +169,20 @@ FROM `Dashboard_DB`.`pfsense_logs` WHERE record_time <= '{}' AND record_time >='
     current_time = now.strftime("%H:%M")
     current_date = now.strftime("%Y-%m-%d")
     if(current_time == os.environ["TIME"]):
-        results = daily_process(query)
-        for result in results:
+        logging.warning("Modelling Start: " + current_time)
+        clients = list_clients()
+        for client in clients:
             try:
-                sub_path = os.path.join(dir + "/" + result[0][2])
-                logging.warning(sub_path)
+                model = daily_process(query, str(client[0]))
+                sub_path = os.path.join(dir + "/" + client[2])
                 create_sub_path(sub_path)
-                logging.warning(str(result[1]))
-                model_save(result[1], sub_path + "/yesterday.pickle")
-                model_save(result[1], sub_path + "/" + todays_day + ".pickle")
-                logging.warning("Daily Done")
-            except:
-                logging.warning("Daily Modelling Failed")
-        if(todays_day == os.environ["day"]):
-            try:
-                results = weekly_process(query)
-                for result in results:
-                    sub_path = os.path.join(dir + "/" + result[0][2])
+                model_save(model, sub_path + "/yesterday.pickle")
+                model_save(model, sub_path + "/" + todays_day + ".pickle")
+                if(todays_day == os.environ["day"]):
+                    model = weekly_process(query, str(client[0]))
+                    sub_path = os.path.join(dir + "/" + client[2])
                     create_sub_path(sub_path)
-                    model_save(result[1], sub_path + "/last_week.pickle")
-                    logging.warning("Weekly Done")
+                    model_save(model, sub_path + "/last_week.pickle")
             except:
-                logging.warning("Weekly Modelling Failed")
+                logging.warning("Error for client: " + str(client[0]))
+        logging.warning("Modelling Complete")
