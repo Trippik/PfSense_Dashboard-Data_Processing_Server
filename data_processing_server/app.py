@@ -14,7 +14,11 @@ import pickle
 from datetime import date
 
 #ADD TO LOG
+logging.warning("----------------------------------------------------")
 logging.warning("Program Started")
+logging.warning("----------------------------------------------------")
+logging.warning(" ")
+logging.warning(" ")
 
 #SET DB PARAMETERS
 db_host = os.environ["DB_IP"]
@@ -88,8 +92,8 @@ def weekly_process(query, client):
     week_ago = now - datetime.timedelta(days=7)
     timestamp_week_ago = week_ago.strftime("%Y-%m-%d %H:%M:%S")
     timestamp_now = now.strftime("%Y-%m-%d %H:%M:%S")
-    logging.warning("Single Client Start: " + timestamp_now)
-    results = query_db(query.format(timestamp_now, timestamp_week_ago, client[0]))
+    logging.warning("Single Client Weekly Model Start: " + timestamp_now)
+    results = query_db(query.format(timestamp_now, timestamp_week_ago, client))
     model = IsolationForest(max_features = 17, n_estimators = 100, n_jobs=-1)
     # fit model
     max = len(results)
@@ -118,7 +122,7 @@ def daily_process(query, client):
     yesterday = now - datetime.timedelta(days=1)
     timestamp_yesterday = yesterday.strftime("%Y-%m-%d %H:%M:%S")
     timestamp_now = now.strftime("%Y-%m-%d %H:%M:%S")
-    logging.warning("Single Client Start: " + timestamp_now)
+    logging.warning("Single Client Daily Model Start: " + timestamp_now)
     results = query_db(query.format(timestamp_now, timestamp_yesterday, client))
     model = IsolationForest(max_features = 17, n_estimators = 100, n_jobs=-1)
     # fit model
@@ -169,10 +173,11 @@ FROM `Dashboard_DB`.`pfsense_logs` WHERE record_time <= '{}' AND record_time >='
     current_time = now.strftime("%H:%M")
     current_date = now.strftime("%Y-%m-%d")
     if(current_time == os.environ["TIME"]):
-        logging.warning("Modelling Start: " + current_time)
+        logging.warning("Overall Modelling Start: " + current_time)
         clients = list_clients()
         for client in clients:
             try:
+                logging.warning("Modelling for " + client[2])
                 model = daily_process(query, str(client[0]))
                 sub_path = os.path.join(dir + "/" + client[2])
                 create_sub_path(sub_path)
@@ -185,4 +190,6 @@ FROM `Dashboard_DB`.`pfsense_logs` WHERE record_time <= '{}' AND record_time >='
                     model_save(model, sub_path + "/last_week.pickle")
             except:
                 logging.warning("Error for client: " + str(client[0]))
-        logging.warning("Modelling Complete")
+            logging.warning(" ")
+            logging.warning(" ")
+        logging.warning("Overall Modelling Complete")
