@@ -6,21 +6,21 @@ def pull_db_details():
 
 def create_db_connection():
     db_details = pull_db_details()
-    db = mysql.connector.connect(
+    return mysql.connector.connect(
         host=db_details[0],
         user=db_details[1],
         password=db_details[2],
         database=db_details[3],
         port=db_details[4]
     )
-    yield db
 
 #READ FROM DB
 def query_db(query):
-    cursor = create_db_connection().cursor()
-    cursor.execute(query)
-    result = cursor.fetchall()
-    return(result)
+    with create_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(query)
+        result = cursor.fetchall()
+        return(result)
 
 def list_clients():
     query = "SELECT id, pfsense_name, hostname FROM pfsense_instances"
